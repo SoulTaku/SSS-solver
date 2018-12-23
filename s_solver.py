@@ -1,35 +1,11 @@
-#!/usr/bin/python
-from z3 import *
+#!/usr/bin/python2
+from lagrange import Lagrange
 
-s = Solver()
+file = raw_input('File: ')
+shares = open(file, 'r').read().split()
 
-k = int(raw_input('Threshold: '))
-f = raw_input('File name: ')
+xs = [int(i.split('-')[0]) for i in shares]
+ys = [int(i.split('-')[1]) for i in shares]
 
-shares = open(f, 'r').read().split()
+print(Lagrange(xs, ys).interpolate())
 
-X = [Int('x{}'.format(int(i+1))) for i in range(k)]
-
-base_eq = '{}X[{}] * {}'
-
-for share in shares:
-	nr, share = share.split('-')
-	nr = int(nr)
-
-	i = 0
-	eq = base_eq.format('', i, 1)
-	for i in range(k-1):
-		i += 1
-		eq += base_eq.format(' + ', i, nr**i)
-	eq += ' == {}'.format(share)
-	
-	try:
-		s.add(eval(eq))
-	except:
-		for i in range(len(shares)):
-			print(X[i])
-
-# print(s)
-assert s.check() == sat
-print(s.model()[X[0]])
-	
